@@ -1,0 +1,11 @@
+lib/contents/default.inc.php
+
+
+lib/biblio_list.inc.php
+
+template/default/custom_frontpage_record.inc.php
+
+template/default/biblio_list_template.php
+
+
+SUBAE07942868517
