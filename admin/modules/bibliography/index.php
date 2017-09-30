@@ -181,6 +181,7 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
     $data['labels'] = $arr_label?serialize($arr_label):'literal{NULL}';
     $data['frequency_id'] = ($_POST['frequencyID'] == '0')?'literal{0}':(integer)$_POST['frequencyID'];
     $data['spec_detail_info'] = trim($dbs->escape_string(strip_tags($_POST['specDetailInfo'])));
+    $data['supp_mat'] = trim($dbs->escape_string(strip_tags($_POST['supp_mat'])));
 
     // RDA Content, Media anda Carrier Type
     foreach ($rda_cmc as $cmc => $cmc_name) {
@@ -776,6 +777,8 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
   $str_input = '<div class="'.$visibility.'"><a class="notAJAX button btn btn-info openPopUp" href="'.MWB.'bibliography/pop_biblio_rel.php?biblioID='.$rec_d['biblio_id'].'" title="'.__('Biblio Relation').'">'.__('Add Relation').'</a></div>';
   $str_input .= '<iframe name="biblioIframe" id="biblioIframe" class="borderAll" style="width: 100%; height: 100px;" src="'.MWB.'bibliography/iframe_biblio_rel.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>';
   $form->addAnything(__('Related Biblio Data'), $str_input);
+
+  $form->addTextField('text', 'supp_mat', __('Supporting Materials'), $rec_d['supp_mat'], 'style="width: 40%;"', __('Supporting Materials Details'));
 
   /**
    * Custom fields
