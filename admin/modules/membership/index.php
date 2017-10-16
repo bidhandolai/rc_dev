@@ -319,8 +319,26 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
 }
 /* RECORD OPERATION END */
 
+//ADD BY DZIKHRI GENERATE ID AUTOMATICALLY
+$q_lastid = $dbs->query("SELECT member_id FROM member WHERE SUBSTR(member_id, 1,4) = 'IALF' ORDER BY member_id DESC LIMIT 1");
+$rw_id = $q_lastid->fetch_assoc();
+$last_id = substr($rw_id['member_id'], 4,5);
+$last_id = $last_id+1;
+$new_id = 'IALF'.$last_id;
+//print_r($rw_id);
+
 /* search form */
 ?>
+<script type="text/javascript">
+    function generateMemberID(type_id){
+       if(type_id == 2 || type_id == 3){
+            $("#memberID").val('<?php echo $new_id; ?>');
+       }else{
+            $("#memberID").val('');
+       }
+   
+    }
+</script>
 <fieldset class="menuBox">
 <div class="menuBoxInner memberIcon">
 	<div class="per_title">
@@ -339,6 +357,7 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
 	</div>
 </div>
 </fieldset>
+
 <?php
 /* search form end */
 /* main content */
@@ -394,10 +413,11 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
         // get mtype data related to this record from database
         $mtype_query = $dbs->query("SELECT member_type_id, member_type_name FROM mst_member_type");
         $mtype_options = array();
+        $mtype_options[] = array('', '');
         while ($mtype_data = $mtype_query->fetch_row()) {
             $mtype_options[] = array($mtype_data[0], $mtype_data[1]);
         }
-    $form->addSelectList('memberTypeID', __('Membership Type').'*', $mtype_options, $rec_d['member_type_id'],'onBlur = "generateMemberID(this.value)"');
+    $form->addSelectList('memberTypeID', __('Membership Type').'*', $mtype_options, $rec_d['member_type_id'],'onChange = "generateMemberID(this.value)"');
 
     // member code
     $str_input = simbio_form_element::textField('text', 'memberID', $rec_d['member_id'], 'id="memberID" onblur="ajaxCheckID(\''.SWB.'admin/AJAX_check_id.php\', \'member\', \'member_id\', \'msgBox\', \'memberID\')" style="width: 30%;"');
