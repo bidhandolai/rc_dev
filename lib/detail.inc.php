@@ -225,10 +225,10 @@ class detail
         $_output .= '<tr>';
         $_output .= '<th>'.__('Title').'</th>';
         $_output .= '<th>'.__('Edition').'</th>';
-        $_output .= '<th>'.__('Language').'</th>';
+        $_output .= '<th>'.__('Call Number').'</th>';
         $_output .= '</tr>';
         // get parent id
-        $parent_q = $this->db->query(sprintf('SELECT b.biblio_id, title, edition, language_id
+        $parent_q = $this->db->query(sprintf('SELECT b.biblio_id, title, edition, language_id, call_number
             FROM biblio_relation AS br INNER JOIN biblio AS b ON br.biblio_id=b.biblio_id
             WHERE rel_biblio_id=%d', $this->detail_id));
         $parent_d = $parent_q->fetch_assoc();
@@ -236,11 +236,11 @@ class detail
             $_output .= '<tr>';
             $_output .= '<td class="biblio-title relation"><a href="'.SWB.'index.php?p=show_detail&id='.$parent_d['biblio_id'].'">'.$parent_d['title'].'</a></td>';
             $_output .= '<td class="biblio-edition relation">'.$parent_d['edition'].'</td>';
-            $_output .= '<td class="biblio-language relation">'.$parent_d['language_id'].'</td>';
+            $_output .= '<td class="biblio-language relation">'.$parent_d['call_number'].'</td>';
             $_output .= '</tr>';
         }
         // check related data
-        $rel_q = $this->db->query(sprintf('SELECT b.biblio_id, title, edition, language_id FROM biblio_relation AS br
+        $rel_q = $this->db->query(sprintf('SELECT b.biblio_id, title, edition, language_id, call_number FROM biblio_relation AS br
           INNER JOIN biblio AS b ON br.rel_biblio_id=b.biblio_id
           WHERE br.biblio_id IN (SELECT biblio_id FROM biblio_relation WHERE rel_biblio_id=%d) OR br.biblio_id=%d',
           $this->detail_id, $this->detail_id));
@@ -256,7 +256,7 @@ class detail
             $_output .= '<tr>';
             $_output .= '<td class="biblio-title relation"><a href="'.SWB.'index.php?p=show_detail&id='.$rel_d['biblio_id'].'">'.$rel_d['title'].'</a></td>';
             $_output .= '<td class="biblio-edition relation">'.$rel_d['edition'].'</td>';
-            $_output .= '<td class="biblio-language relation">'.$rel_d['language_id'].'</td>';
+            $_output .= '<td class="biblio-language relation">'.$rel_d['call_number'].'</td>';
             $_output .= '</tr>';
         }
 

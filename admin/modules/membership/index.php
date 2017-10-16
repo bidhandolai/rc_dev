@@ -390,6 +390,14 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     if (file_exists(MDLBS.'membership/member_custom_fields.inc.php')) {
         include MDLBS.'membership/member_custom_fields.inc.php';
     }
+     // member type
+        // get mtype data related to this record from database
+        $mtype_query = $dbs->query("SELECT member_type_id, member_type_name FROM mst_member_type");
+        $mtype_options = array();
+        while ($mtype_data = $mtype_query->fetch_row()) {
+            $mtype_options[] = array($mtype_data[0], $mtype_data[1]);
+        }
+    $form->addSelectList('memberTypeID', __('Membership Type').'*', $mtype_options, $rec_d['member_type_id'],'onBlur = "generateMemberID(this.value)"');
 
     // member code
     $str_input = simbio_form_element::textField('text', 'memberID', $rec_d['member_id'], 'id="memberID" onblur="ajaxCheckID(\''.SWB.'admin/AJAX_check_id.php\', \'member\', \'member_id\', \'msgBox\', \'memberID\')" style="width: 30%;"');
@@ -414,14 +422,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     }
     // member institution
     $form->addTextField('text', 'instName', __('Institution'), $rec_d['inst_name'], 'style="width: 100%;"');
-    // member type
-        // get mtype data related to this record from database
-        $mtype_query = $dbs->query("SELECT member_type_id, member_type_name FROM mst_member_type");
-        $mtype_options = array();
-        while ($mtype_data = $mtype_query->fetch_row()) {
-            $mtype_options[] = array($mtype_data[0], $mtype_data[1]);
-        }
-    $form->addSelectList('memberTypeID', __('Membership Type').'*', $mtype_options, $rec_d['member_type_id']);
+   
     // member gender
     $gender_chbox[0] = array('1', __('Male'));
     $gender_chbox[1] = array('0', __('Female'));

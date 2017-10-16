@@ -131,7 +131,7 @@ if (!$reportView) {
     // create datagrid
     $reportgrid = new report_datagrid();
     $reportgrid->setSQLColumn('m.member_id AS \''.__('Member ID').'\'');
-    $reportgrid->setSQLorder('l.due_date DESC');
+   // $reportgrid->setSQLorder('due_date DESC');
     $reportgrid->sql_group_by = 'm.member_id';
 
     $overdue_criteria = ' (l.is_lent=1 AND l.is_return=0) ';
@@ -187,7 +187,7 @@ if (!$reportView) {
         unset($member_q);
 
         $ovd_title_q = $obj_db->query('SELECT l.item_code,
-            b.title, l.loan_date, l.due_date
+            b.title, l.loan_date, due_date
             FROM loan AS l
                 LEFT JOIN item AS i ON l.item_code=i.item_code
                 LEFT JOIN biblio AS b ON i.biblio_id=b.biblio_id

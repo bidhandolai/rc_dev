@@ -78,7 +78,7 @@ if (isset($_SESSION['memberID'])) {
     $memberID = trim($_SESSION['memberID']);
     $circulation = new circulation($dbs, $memberID);
     $loan_list_query = $dbs->query(sprintf("SELECT L.loan_id, b.title, ct.coll_type_name,
-        i.item_code, L.loan_date, L.due_date, L.return_date, L.renewed,
+        i.item_code, L.loan_date, L.due_date, L.return_date, L.renewed, i.call_number, 
         IF(lr.reborrow_limit IS NULL, IF(L.renewed>=mt.reborrow_limit, 1, 0), IF(L.renewed>=lr.reborrow_limit, 1, 0)) AS extend
         FROM loan AS L
         LEFT JOIN item AS i ON L.item_code=i.item_code
@@ -95,7 +95,7 @@ if (isset($_SESSION['memberID'])) {
     $loan_list->table_header_attr = 'class="dataListHeader" style="font-weight: bold;"';
     $loan_list->highlight_row = true;
     // table header
-    $headers = array(__('Return'), __('Extend'), __('Item Code'), __('Title'), __('Col. Type'), __('Loan Date'), __('Due Date'));
+    $headers = array(__('Return'), __('Extend'), __('Call Number'), __('Item Code'), __('Title'), __('Col. Type'), __('Loan Date'), __('Due Date'));
     $loan_list->setHeader($headers);
     // row number init
     $row = 1;
@@ -140,6 +140,7 @@ if (isset($_SESSION['memberID'])) {
         $fields = array(
             $return_link,
             $extend_link,
+            $loan_list_data['call_number'],
             $loan_list_data['item_code'],
             $loan_list_data['title'],
             $loan_list_data['coll_type_name'],
@@ -154,8 +155,9 @@ if (isset($_SESSION['memberID'])) {
         $loan_list->setCellAttr($row, 0, "valign='top' align='center' class='$row_class' style='width: 5%;'");
         $loan_list->setCellAttr($row, 1, "valign='top' align='center' class='$row_class' style='width: 5%;'");
         $loan_list->setCellAttr($row, 2, "valign='top' class='$row_class' style='width: 10%;'");
-        $loan_list->setCellAttr($row, 3, "valign='top' class='$row_class' style='width: 50%;'");
-        $loan_list->setCellAttr($row, 4, "valign='top' class='$row_class' style='width: 15%;'");
+        $loan_list->setCellAttr($row, 3, "valign='top' class='$row_class' style='width: 10%;'");
+        $loan_list->setCellAttr($row, 4, "valign='top' class='$row_class' style='width: 50%;'");
+        $loan_list->setCellAttr($row, 5, "valign='top' class='$row_class' style='width: 15%;'");
 
         $row++;
     }

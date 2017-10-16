@@ -133,15 +133,15 @@ if ($biblioID) {
       $remove_link = '<a class="notAJAX btn button btn-danger btn-delete" href="iframe_biblio_rel.php?removesess='.$biblio_session[0].'">' . __('Remove') . '</a>';
 
       if ($biblio_session) {
-          $title_q = $dbs->query("SELECT title, publish_year, edition FROM biblio
+          $title_q = $dbs->query("SELECT title, publish_year, edition, call_number FROM biblio
               WHERE biblio_id=".$biblio_session[0]);
           $title_d = $title_q->fetch_row();
           $title = $title_d[0];
-          $publish_year = $title_d[1];
+          $call_number = $title_d[1];
           $edition = $title_d[2];
       }
 
-      $table->appendTableRow(array($remove_link, $title, $publish_year, $edition));
+      $table->appendTableRow(array($remove_link, $title, $call_number, $edition));
       $table->setCellAttr($row, 0, 'valign="top" class="'.$row_class.'" style="font-weight: bold; background-color: #ffc466; width: 10%;"');
       $table->setCellAttr($row, 1, 'valign="top" class="'.$row_class.'" style="background-color: #ffc466; width: 50%;"');
       $table->setCellAttr($row, 2, 'valign="top" class="'.$row_class.'" style="background-color: #ffc466; width: 20%;"');

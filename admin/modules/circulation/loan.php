@@ -138,7 +138,7 @@ if (isset($_SESSION['memberID'])) {
         $temp_loan_list->table_header_attr = 'class="dataListHeader" style="font-weight: bold;"';
         $temp_loan_list->highlight_row = true;
         // table header
-        $headers = array(__('Remove'),  __('Item Code'), __('Title'), __('Loan Date'), __('Due Date'));
+        $headers = array(__('Remove'),  __('Call Number'),  __('Item Code'), __('Title'), __('Loan Date'), __('Due Date'));
         $temp_loan_list->setHeader($headers);
         // row number init
         $row = 1;
@@ -160,7 +160,7 @@ if (isset($_SESSION['memberID'])) {
 
             // row colums array
             $fields = array(
-                $remove_link, $temp_loan_list_d['item_code'],
+                $remove_link, $temp_loan_list_d['call_number'], $temp_loan_list_d['item_code'],
                 $temp_loan_list_d['title'], $loan_date, $due_date);
 
             // append data to table row
@@ -169,7 +169,8 @@ if (isset($_SESSION['memberID'])) {
             $temp_loan_list->setCellAttr($row, null, 'class="'.$row_class.'"');
             $temp_loan_list->setCellAttr($row, 0, 'valign="top" align="center" style="width: 5%;"');
             $temp_loan_list->setCellAttr($row, 1, 'valign="top" style="width: 10%;"');
-            $temp_loan_list->setCellAttr($row, 2, 'valign="top" style="width: 60%;"');
+            $temp_loan_list->setCellAttr($row, 2, 'valign="top" style="width: 10%;"');
+            $temp_loan_list->setCellAttr($row, 3, 'valign="top" style="width: 60%;"');
 
             $row++;
         }

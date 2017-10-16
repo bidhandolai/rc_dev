@@ -228,7 +228,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     /* RECORD FORM */
     // try query
     $itemID = (integer)isset($_POST['itemID'])?$_POST['itemID']:0;
-    $rec_q = $dbs->query('SELECT item.*, b.biblio_id, b.title, s.supplier_name
+    $rec_q = $dbs->query('SELECT item.*, b.biblio_id, b.title, s.supplier_name 
         FROM item
         LEFT JOIN biblio AS b ON item.biblio_id=b.biblio_id
         LEFT JOIN mst_supplier AS s ON item.supplier_id=s.supplier_id
@@ -242,8 +242,8 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     $form->table_attr = 'align="center" id="dataList" cellpadding="5" cellspacing="0"';
     $form->table_header_attr = 'class="alterCell" style="font-weight: bold;"';
     $form->table_content_attr = 'class="alterCell2"';
-
-    // edit mode flag set
+    
+    // edit mode flag set 
     if ($rec_q->num_rows > 0) {
         $form->edit_mode = true;
         // record ID for delete process
@@ -271,11 +271,20 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
         if (isset($_GET['biblioID'])) {
             $biblioID = (integer)$_GET['biblioID'];
         }
-        $biblio_q = $dbs->query('SELECT biblio_id, title, call_number FROM biblio WHERE biblio_id='.$biblioID);
+        $biblio_q = $dbs->query('SELECT biblio_id, title, call_number, gmd_id FROM biblio WHERE biblio_id='.$biblioID);
         $biblio_d = $biblio_q->fetch_assoc();
         $b_title = $biblio_d['title'];
         $b_id = $biblio_d['biblio_id'];
         $def_call_number = $biblio_d['call_number'];
+        // Dzikhri sayyid.ilmy@gmail.com
+        //Auto Generate Item Code / Barcode Item 
+        // Pattern : [YEAR].[GMD_ID].[LAST_INCREMENT_ID];
+
+        $year = date("Y"); // Year Now();
+        $gmd_id = $biblio_d['gmd_id']; //GMD ID
+        $incrx = $dbs->query("SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '".DB_NAME."' AND TABLE_NAME = 'item'")->fetch_row(); //LAST INCREMENT
+
+        $rec_d['item_code'] = $year.'.'.$gmd_id.'.'.$incrx[0]; //Generate ID
     }
 
     /* Form Element(s) */
@@ -289,7 +298,8 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     $form->addHidden('biblioID', $b_id);
     // item code
     $str_input = simbio_form_element::textField('text', 'itemCode', $rec_d['item_code'], 'onblur="ajaxCheckID(\''.SWB.'admin/AJAX_check_id.php\', \'item\', \'item_code\', \'msgBox\', \'itemCode\')" style="width: 40%;"');
-    $str_input .= ' &nbsp; <span id="msgBox">&nbsp;</span>';
+    //Dzikhri Change MsgBox
+    $str_input .= ' &nbsp; <span id="msgBox">Generate By System. Change it, if you want manually.</span>';
     $form->addAnything(__('Item Code'), $str_input);
     // call number
     $form->addTextField('text', 'callNumber', __('Call Number'), isset($rec_d['call_number'])?$rec_d['call_number']:$def_call_number, 'style="width: 40%;"');

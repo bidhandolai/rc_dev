@@ -20,10 +20,7 @@
 
 $menu[] = array('Header', __('Shortcut'));
 $menu['user-profile'] = array(__('Change User Profiles'), MWB.'system/app_user.php?changecurrent=true&action=detail', __('Change Current User Profiles and Password'));
-/*
-if (utility::havePrivilege('bibliography', 'r') AND utility::havePrivilege('bibliography', 'w')) {
-  $menu[] = array(__('Add New Bibliography'), MWB.'bibliography/index.php?action=detail', __('Add New Bibliographic Data/Catalog'));
-}
+
 if (utility::havePrivilege('circulation', 'r') AND utility::havePrivilege('circulation', 'w')) {
   $menu[] = array(__('Start Transaction'), MWB.'circulation/index.php?action=start', __('Start Circulation Transaction Proccess'));
 }
@@ -33,4 +30,6 @@ if (utility::havePrivilege('circulation', 'r') AND utility::havePrivilege('circu
 if (utility::havePrivilege('membership', 'r') AND utility::havePrivilege('membership', 'w')) {
   $menu[] = array(__('Add New Member'), MWB.'membership/index.php?action=detail', __('Add New Library Member Data'));
 }
-*/
+if (utility::havePrivilege('bibliography', 'r') AND utility::havePrivilege('bibliography', 'w')) {
+  $menu[] = array(__('Add New Bibliography'), MWB.'bibliography/index.php?action=detail', __('Add New Bibliographic Data/Catalog'));
+}

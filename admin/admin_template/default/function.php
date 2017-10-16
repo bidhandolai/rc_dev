@@ -49,7 +49,8 @@ function main_menu()
     'reporting'      => 'fa fa-file-text-o',
     'serial_control' => 'fa fa-barcode',
     'logout'         => 'fa fa-close',
-    'opac'           => 'fa fa-desktop'
+    'opac'           => 'fa fa-desktop',
+    'memo'           => 'fa fa-envelope-o'
     );
   //fake, just for translation po... xieyh :(
   $translations          = array(

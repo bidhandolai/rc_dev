@@ -638,7 +638,8 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
   while ($location_d = $location_q->fetch_row()) {
     $location_options[] = array($location_d[0], $location_d[1]);
   }
-  $str_input .= __('Location').': '.simbio_form_element::selectList('locationID', $location_options, '', 'style="width: 100px;"');;
+  $str_input .= __('Location').': '.simbio_form_element::selectList('locationID', $location_options, '', 'style="width: 100px;"');
+  
   $form->addAnything(__('Item(s) code batch generator'), $str_input);
   // biblio item add
   if (!$in_pop_up AND $form->edit_mode) {
@@ -647,6 +648,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     $str_input .= '<iframe name="itemIframe" id="itemIframe" class="borderAll" style="width: 100%; height: 70px;" src="'.MWB.'bibliography/iframe_item_list.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>'."\n";
     $form->addAnything(__('Item(s) Data'), $str_input);
   }
+  
   // biblio gmd
   // get gmd data related to this record from database
   $gmd_q = $dbs->query('SELECT gmd_id, gmd_name FROM mst_gmd');
@@ -696,7 +698,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
   }
   $form->addSelectList('publisherID', __('Publisher'), $publ_options, $rec_d['publisher_id'], 'class="select2" data-src="'.SWB.'admin/AJAX_lookup_handler.php?format=json&allowNew=true" data-src-table="mst_publisher" data-src-cols="publisher_id:publisher_name"');
   // biblio publish year
-  $form->addTextField('text', 'year', __('Publishing Year'), $rec_d['publish_year'], 'style="width: 40%;"', __('Year of publication'));
+  $form->addTextField('text', 'year', __('Publishing Year'), $rec_d['publish_year'], 'style="width: 10%;" maxlength="4"', __('Year of publication'));
   // biblio publish place
   $plc_options[] = array('NONE', '');
   if ($rec_d['publish_place_id']) {
@@ -778,7 +780,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
   $str_input .= '<iframe name="biblioIframe" id="biblioIframe" class="borderAll" style="width: 100%; height: 100px;" src="'.MWB.'bibliography/iframe_biblio_rel.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>';
   $form->addAnything(__('Related Biblio Data'), $str_input);
 
-  $form->addTextField('text', 'supp_mat', __('Supporting Materials'), $rec_d['supp_mat'], 'style="width: 40%;"', __('Supporting Materials Details'));
+  $form->addTextField('text', 'supp_mat', __('Supporting Materials'), $rec_d['supp_mat'], 'style="width: 75%;"', __('Supporting Materials Details'));
 
   /**
    * Custom fields

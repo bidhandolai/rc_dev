@@ -150,7 +150,7 @@ class circulation extends member
             return LOAN_NOT_PERMITTED_PENDING;
         }
         $_q = $this->obj_db->query("SELECT b.title, i.coll_type_id,
-            b.gmd_id, ist.no_loan FROM biblio AS b
+            b.gmd_id, ist.no_loan, i.call_number FROM biblio AS b
             LEFT JOIN item AS i ON b.biblio_id=i.biblio_id
             LEFT JOIN mst_item_status AS ist ON i.item_status_id=ist.item_status_id
             WHERE i.item_code='$str_item_code'");
@@ -209,6 +209,7 @@ class circulation extends member
             if (defined('IGNORE_LOAN_RULES')) {
                 $_SESSION['temp_loan'][$str_item_code] = array(
                     'item_code' => $str_item_code,
+                    'call_number' => $_d[4],
                     'loan_rules_id' => $this->item_loan_rules,
                     'title' => $_d[0],
                     'loan_date' => $_loan_date,
@@ -219,6 +220,7 @@ class circulation extends member
                 // are the loan limit reached?
                 $_SESSION['temp_loan'][$str_item_code] = array(
                     'item_code' => $str_item_code,
+                    'call_number' => $_d[4],
                     'loan_rules_id' => $this->item_loan_rules,
                     'title' => $_d[0],
                     'loan_date' => $_loan_date,

@@ -61,10 +61,10 @@
       </tr>
       <!-- ============================================= -->  
       <tr>
-        <th><?php echo __('Publisher'); ?></th>
+        <th><?php echo __('Imprint'); ?></th>
         <td>
-          <span itemprop="publisher" property="publisher" itemtype="http://schema.org/Organization" itemscope><?php echo $publisher_name ?></span> :
-          <span itemprop="publisher" property="publisher"><?php echo $publish_place ?></span>.,
+          <span itemprop="publisher" property="publisher" itemtype="http://schema.org/Organization" itemscope><?php echo $publish_place ?></span> :
+          <span itemprop="publisher" property="publisher"><?php echo $publisher_name ?></span>.,
           <span itemprop="datePublished" property="datePublished"><?php echo $publish_year ?></span>
         </td>
       </tr>
