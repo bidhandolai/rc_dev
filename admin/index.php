@@ -20,6 +20,8 @@
  *
  */
 
+
+
 // key to authenticate
 define('INDEX_AUTH', '1');
 
@@ -57,6 +59,7 @@ $can_read = utility::havePrivilege($current_module, 'r');
 
 // submenu
 $sub_menu = $module->generateSubMenu(($current_module AND $can_read)?$current_module:'');
+print_r($_SESSION);
 
 // start the output buffering for main content
 ob_start();
@@ -74,8 +77,10 @@ if ($current_module AND $can_read) {
     // for debugs purpose only
     // include 'modules/bibliography/index.php';
 }
+
 // page content
 $main_content = ob_get_clean();
 
 // print out the template
 require $sysconf['admin_template']['dir'].'/'.$sysconf['admin_template']['theme'].'/index_template.inc.php';
+

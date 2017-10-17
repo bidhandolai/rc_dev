@@ -175,7 +175,7 @@ if (!$reportView) {
         'l.loan_date AS \''.__('Loan Date').'\'',
         'l.due_date AS \''.__('Due Date').'\'', 'l.is_return AS \''.__('Loan Status').'\'',
         'i.call_number AS \''.__('Call Number').'\'');
-    $reportgrid->setSQLorder('l.loan_date DESC');
+    $reportgrid->setSQLorder('l.loan_id DESC');
 
     $criteria = 'm.member_id IS NOT NULL ';
     if (isset($_GET['id_name']) AND !empty($_GET['id_name'])) {

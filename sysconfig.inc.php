@@ -533,8 +533,8 @@ $sysconf['chat_system']['server_port']  = 9300;
 $sysconf['news']['num_each_page'] = 10;
 
 /* LIBRARY MAP COORDINATES */
-$sysconf['location']['lat'] = -7.977000;
-$sysconf['location']['long'] = 112.634025;
+$sysconf['location']['lat'] = -8.696429;
+$sysconf['location']['long'] = 115.218709;
 
 /* CHART */
 $sysconf['chart']['mode'] = 'chartjs'; // plot or chartjs. default is plot
