@@ -40,3 +40,5 @@ $menu[] = array(__('Visitor Statistic'), MWB.'reporting/customs/visitor_report.p
 $menu[] = array(__('Visitor Statistic (by Day)'), MWB.'reporting/customs/visitor_report_day.php', __('Visitor Statistic (by Day)'));
 $menu[] = array(__('Visitor List'), MWB.'reporting/customs/visitor_list.php', __('Visitor List'));
 $menu[] = array(__('Fines Report'), MWB.'reporting/customs/fines_report.php', __('Fines Report'));
+$menu[] = array(__('Overdued List Member'), MWB.'reporting/customs/overdued_list_bymember.php', __('View Members Having Overdues'));
+
