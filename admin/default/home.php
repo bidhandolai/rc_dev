@@ -315,9 +315,73 @@ if($sysconf['admin_home']['mode'] == 'default') {
     $get_total_item      = number_format($item->total,0,'.',',');
     $get_total_available = $item->total - $get_total_loan;
     $get_total_available = number_format($get_total_available,0,'.',',');
+
+
+    $mtype_query = $dbs->query("SELECT memo_type_id, memo_type_name FROM mst_memo_type");
+    $mtype_options = array();
+    $mtype_options[] = array('', '');
+    while ($mtype_data = $mtype_query->fetch_row()) {
+        $mtype_options[] = array($mtype_data[0], $mtype_data[1]);
+    }
+
+    // get memo
+    $sql_memo = "SELECT m.*, u.realname, mt.memo_type_name FROM memo m LEFT JOIN user u ON u.user_id = m.user_id LEFT JOIN mst_memo_type mt ON mt.memo_type_id = m.memo_type_id WHERE isshow = 1 AND (date_start <= '".date("Y-m-d")."' AND date_end >= '".date("Y-m-d")."') order by memo_id desc";
+
+    // echo $sql_date; //for debug purpose only
+    $d_memo = $dbs->query($sql_memo);
+    
+
 ?>
 <div class="contentDesc">    
     <div class="container-fluid">
+        <div class="row">
+<?php 
+    if($d_memo->num_rows == 0 ) {
+        echo '<div class="alert alert-warning">';            
+                echo 'There is no memo to show.';
+        echo '</div>';
+    }else{
+        $a_memo = array();
+        while($row_m = $d_memo->fetch_array()){
+            //$a_memo[$row_m['memo_id']]['memo_id'] = $row_m['memo_id'];
+            //$a_memo[$row_m['memo_id']]['isshow'] = $row_m['isshow'];
+            //$a_memo[$row_m['memo_id']]['memo_type'] = $row_m['memo_type_id'];
+            //$a_memo[$row_m['memo_id']]['title'] = $row_m['memo_title'];
+            //$a_memo[$row_m['memo_id']]['content'] = $row_m['memo_content'];
+            //$a_memo[$row_m['memo_id']]['start'] = $row_m['date_start'];
+            //$a_memo[$row_m['memo_id']]['end'] = $row_m['date_end'];
+            //$a_memo[$row_m['memo_id']]['receiver'] = unserialize($row_m['memo_receiver']);
+            $SqlCreator = "SELECT realname FROM user WHERE user_id = '".$row_m['user_id']."' ";
+            $q_Creator = $dbs->query($SqlCreator);
+            $name      = $q_Creator->fetch_object();
+            $get_name  = $name->realname;
+
+            if($row_m['memo_receiver'] == NULL OR in_array($_SESSION['uid'], unserialize($row_m['memo_receiver']))){
+   
+   //print_r($a_memo);
+   //exit();
+?>
+            <div class="col-lg-6 panel-default">
+              <div class="panel panel-info">
+                <div class="panel-heading">
+                  <h2 class="panel-title">[<?php echo $row_m['memo_type_name']; ?>] <?php echo $row_m['memo_title'] ?> </h2>
+                </div>
+                <div class="panel-body">
+                   <?php echo $row_m['memo_content']; ?>  
+                </div>
+                <div class="panel-footer">
+                    <div class="s-dashboard-legend">
+                        Memo will expired at <?php echo $row_m['date_end']; ?> | Created By <?php echo $get_name; ?>
+                    </div>
+                </div>
+              </div>
+            </div>
+<?php 
+            }
+        }
+    }
+?>
+        </div>
         <div class="row">
             <div class="col-lg-8 s-dashboard">
               <div class="panel panel-info">

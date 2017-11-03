@@ -293,4 +293,10 @@ class biblio_list extends biblio_list_model {
     // echo "<div style=\"border: 1px solid navy; padding: 5px; color: navy; margin: 5px;\">$_sql_str</div>";
 	  return $_sql_str;
   }
+
+  
+
+
+   
+
 }

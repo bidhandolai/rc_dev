@@ -150,7 +150,7 @@ if (isset($_POST['process']) AND isset($_POST['loanID'])) {
     exit();
 }
 
-
+//define('LOAN_NOT_PERMITTED_HOUR', 11);
 // add temporary item to session
 if (isset($_POST['tempLoanID'])) {
     // create circulation object
@@ -158,8 +158,40 @@ if (isset($_POST['tempLoanID'])) {
     // set holiday settings
     $circulation->holiday_dayname = $_SESSION['holiday_dayname'];
     $circulation->holiday_date = $_SESSION['holiday_date'];
-    // add item to loan session
-    $add = $circulation->addLoanSession(trim($_POST['tempLoanID']));
+
+    //Tambahan Dzikhri 
+    if($_SESSION['memberTypeID'] == 4){
+       
+        $q_check_coll_type = $dbs->query("SELECT b.title, i.coll_type_id,
+            b.gmd_id, ist.no_loan, i.call_number FROM biblio AS b
+            LEFT JOIN item AS i ON b.biblio_id=i.biblio_id
+            LEFT JOIN mst_item_status AS ist ON i.item_status_id=ist.item_status_id
+            WHERE i.item_code='".$_POST['tempLoanID']."'");
+        $d_ch = $q_check_coll_type->fetch_assoc();
+
+        date_default_timezone_set("Asia/Singapore"); 
+        //echo date("H:i:s", time()); 
+  
+        //echo date("H:i:s", time()).'-'.date('15:00:00').'<BR>';
+       // echo strtotime(date("H:i:s", time())).'<'.strtotime(date('16:00:00'));
+        //exit();
+        if($d_ch['coll_type_id'] == 5 or $d_ch['coll_type_id'] == 8){
+            if(strtotime(date("H:i:s", time())) < strtotime(date('16:00:00'))){
+                $add = 'LOAN_NOT_PERMITTED_HOUR';
+            }else{
+                $add = $circulation->addLoanSession(trim($_POST['tempLoanID']));
+            }
+        }else{
+             // add item to loan session
+            $add = $circulation->addLoanSession(trim($_POST['tempLoanID']));
+        }
+            
+    }else{
+        // add item to loan session
+        $add = $circulation->addLoanSession(trim($_POST['tempLoanID']));
+    }   
+
+   
     if ($add == LOAN_LIMIT_REACHED) {
         echo '<html>';
         echo '<body>';
@@ -219,6 +251,11 @@ if (isset($_POST['tempLoanID'])) {
     } else if ($add == ITEM_LOAN_FORBID) {
         echo '<script type="text/javascript">';
         echo 'alert(\''.__('Loan Forbidden for this Item!').'\');';
+        echo 'location.href = \'loan.php\';';
+        echo '</script>';
+    } else if ($add == 'LOAN_NOT_PERMITTED_HOUR') {
+        echo '<script type="text/javascript">';
+        echo 'alert(\''.__('Loan Forbidden for this Item during this Hour!').'\');';
         echo 'location.href = \'loan.php\';';
         echo '</script>';
     } else {

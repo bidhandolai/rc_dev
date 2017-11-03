@@ -36,6 +36,7 @@ require SIMBIO.'simbio_GUI/form_maker/simbio_form_table_AJAX.inc.php';
 require SIMBIO.'simbio_GUI/paging/simbio_paging.inc.php';
 require SIMBIO.'simbio_DB/datagrid/simbio_dbgrid.inc.php';
 
+
 // privileges checking
 $can_read = utility::havePrivilege('bibliography', 'r');
 
@@ -44,6 +45,16 @@ if (!$can_read) {
 }
 
 $max_print = 50;
+
+ // Dzikhri
+    // uses regex that accepts any word character or hyphen in last name
+   function split_name($name) {
+        $name = trim($name);
+        $last_name = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
+        $first_name = trim( preg_replace('#'.$last_name.'#', '', $name ) );
+        
+        return '<b>'.strtoupper($last_name).'</b>'.','.$first_name;
+    }
 
 /* RECORD OPERATION */
 if (isset($_POST['itemID']) AND !empty($_POST['itemID']) AND isset($_POST['itemAction'])) {
@@ -56,11 +67,11 @@ if (isset($_POST['itemID']) AND !empty($_POST['itemID']) AND isset($_POST['itemA
     }
     /* LABEL SESSION ADDING PROCESS */
     $print_count = 0;
-    if (isset($_SESSION['labels']['biblio'])) {
-        $print_count_biblio = count($_SESSION['labels']['biblio']);
+    if (isset($_SESSION['bookcards']['biblio'])) {
+        $print_count_biblio = count($_SESSION['bookcards']['biblio']);
     }
-    if (isset($_SESSION['labels']['item'])) {
-        $print_count_item = count($_SESSION['labels']['item']);
+    if (isset($_SESSION['bookcards']['item'])) {
+        $print_count_item = count($_SESSION['bookcards']['item']);
     }
     // loop array
     foreach ($_POST['itemID'] as $itemID) {
@@ -71,18 +82,18 @@ if (isset($_POST['itemID']) AND !empty($_POST['itemID']) AND isset($_POST['itemA
         if (stripos($itemID, 'b', 0) !== false) {
             // Biblio ID
             $biblioID = str_ireplace('b', '', $itemID);
-            if (isset($_SESSION['labels']['biblio'][$biblioID])) {
+            if (isset($_SESSION['bookcards']['biblio'][$biblioID])) {
                 continue;
             }
-            $_SESSION['labels']['biblio'][$biblioID] = $biblioID;
+            $_SESSION['bookcards']['biblio'][$biblioID] = $biblioID;
             $print_count_biblio++;
         } else {
             // Item ID
             $itemID = (integer)$itemID;
-            if (isset($_SESSION['labels']['item'][$itemID])) {
+            if (isset($_SESSION['bookcards']['item'][$itemID])) {
                 continue;
             }
-            $_SESSION['labels']['item'][$itemID] = $itemID;
+            $_SESSION['bookcards']['item'][$itemID] = $itemID;
             $print_count_item++;
         }
     }
@@ -102,29 +113,29 @@ if (isset($_POST['itemID']) AND !empty($_POST['itemID']) AND isset($_POST['itemA
 if (isset($_GET['action']) AND $_GET['action'] == 'clear') {
     utility::jsAlert(__('Print queue cleared!'));
     echo '<script type="text/javascript">top.$(\'#queueCount\').html(\'0\');</script>';
-    unset($_SESSION['labels']);
+    unset($_SESSION['bookcards']);
     exit();
 }
 
 // on print action
 if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     // check if label session array is available
-    if (!isset($_SESSION['labels']['item']) && !isset($_SESSION['labels']['biblio'])) {
+    if (!isset($_SESSION['bookcards']['item']) && !isset($_SESSION['bookcards']['biblio'])) {
         utility::jsAlert(__('There is no data to print!'));
         die();
     }
 
     // concat item ID
     $item_ids = '';
-    if (isset($_SESSION['labels']['item'])) {
-        foreach ($_SESSION['labels']['item'] as $id) {
+    if (isset($_SESSION['bookcards']['item'])) {
+        foreach ($_SESSION['bookcards']['item'] as $id) {
             $item_ids .= $id.',';
         }
     }
     // concat biblio ID
     $biblio_ids = '';
-    if (isset($_SESSION['labels']['biblio'])) {
-        foreach ($_SESSION['labels']['biblio'] as $id) {
+    if (isset($_SESSION['bookcards']['biblio'])) {
+        foreach ($_SESSION['bookcards']['biblio'] as $id) {
             $biblio_ids .= $id.',';
         }
     }
@@ -144,11 +155,13 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     }
 
     // send query to database
-    $biblio_q = $dbs->query('SELECT IF(i.call_number<>\'\', i.call_number, b.call_number) FROM biblio AS b LEFT JOIN item AS i ON b.biblio_id=i.biblio_id WHERE '.$criteria);
+    $biblio_q = $dbs->query('SELECT i.call_number, b.title, i.item_code, b.biblio_id, b.gmd_id FROM biblio AS b LEFT JOIN item AS i ON b.biblio_id=i.biblio_id WHERE '.$criteria);
     // echo 'SELECT IF(i.call_number!=\'\', i.call_number, b.call_number) FROM biblio AS b LEFT JOIN item AS i ON b.biblio_id=i.biblio_id WHERE '.$criteria;
     $label_data_array = array();
     while ($biblio_d = $biblio_q->fetch_row()) {
-      if ($biblio_d[0]) { $label_data_array[] = $biblio_d[0]; }
+        if ($biblio_d[0]) { 
+            $label_data_array[] = $biblio_d; 
+        }
     }
 
     // include printed settings configuration file
@@ -163,15 +176,16 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     loadPrintSettings($dbs, 'label');
 
     // chunk label array
-    $chunked_label_arrays = array_chunk($label_data_array, $sysconf['print']['label']['items_per_row']);
+    $chunked_label_arrays = array_chunk($label_data_array, 4);
     // create html ouput of images
     $html_str = '<!DOCTYPE html>'."\n";
-    $html_str .= '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Document Label Print Result</title>'."\n";
+    $html_str .= '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Document Book Card Print Result</title>'."\n";
     $html_str .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
     $html_str .= '<meta http-equiv="Pragma" content="no-cache" /><meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0" /><meta http-equiv="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT" />';
     $html_str .= '<style type="text/css">'."\n";
-    $html_str .= 'body { padding: 0; margin: 1cm; font-family: '.$sysconf['print']['label']['fonts'].'; font-size: '.$sysconf['print']['label']['font_size'].'pt; background: #fff; }'."\n";
-    $html_str .= '.labelStyle { vertical-align:middle; width: '.$sysconf['print']['label']['box_width'].'cm; height: '.$sysconf['print']['label']['box_height'].'cm; text-align: center; margin: '.$sysconf['print']['label']['items_margin'].'cm; padding-top: 10px; border: '.$sysconf['print']['label']['border_size'].'px solid #000000; }'."\n";
+    $html_str .= '@page {size:auto; margin: 0mm 0mm 0mm 0mm;}';
+    $html_str .= 'body { padding: 0cm; margin: 0cm; font-family: '.$sysconf['print']['label']['fonts'].'; font-size: '.$sysconf['print']['label']['font_size'].'pt; background: #fff; }'."\n";
+    $html_str .= '.labelStyle { width: 6cm; height: 10cm; text-align: center; margin: 0; padding: 0; border: 1px solid #000000; }'."\n";
     $html_str .= '.labelHeaderStyle { background-color: #CCCCCC; font-weight: bold; padding: 5px; margin-bottom: 5px; }'."\n";
     $html_str .= '</style>'."\n";
     $html_str .= '</head>'."\n";
@@ -179,18 +193,38 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     $html_str .= '<a href="#" onclick="window.print()">' . __('Print Again') . '</a>'."\n";
     $html_str .= '<table style="margin: 0; padding: 0;" cellspacing="0" cellpadding="0">'."\n";
     // loop the chunked arrays to row
-    foreach ($chunked_label_arrays as $label_data) {
+    foreach ($chunked_label_arrays as $bookcards_data) {
         $html_str .= '<tr>'."\n";
-        foreach ($label_data as $label) {
-            $html_str .= '<td valign="middle">';
-            $html_str .= '<div class="labelStyle" valign="middle"><b>';
-            if ($sysconf['print']['label']['include_header_text']) { $html_str .= '<div class="labelHeaderStyle">'.($sysconf['print']['label']['header_text']?$sysconf['print']['label']['header_text']:$sysconf['library_name']).'</div>'; }
+        foreach ($bookcards_data as $bookcard) {
+            //echo "SELECT author_name FROM biblio_author b JOIN mst_author m ON b.author_id = m.author_id WHERE biblio_id = '".$bookcard[3]."' ORDER BY m.author_id ASC LIMIT 1";
+            //exit();
+            $q_author = $dbs->query("SELECT author_name FROM biblio_author b JOIN mst_author m ON b.author_id = m.author_id WHERE biblio_id = '".$bookcard[3]."' ORDER BY m.author_id ASC LIMIT 1");
+            $d_author = $q_author->fetch_row();
+            $author_name = split_name($d_author[0]);
+
+            $html_str .= '<td valign="top">';
+            $html_str .= '<div class="labelStyle" valign="top">';
+            $html_str .= '<table border=0 width="100%">';
+            $html_str .= '<tr>';
+            $html_str .= '<td colspan="2" align="right"><font size=1pt>'.$bookcard[2].'</font></td>';
+            $html_str .= '</tr>';
+            $html_str .= '<tr>';
+            $html_str .= '<td rowspan="3" align="center" valign="top" width="10%"><b>';
             // explode label data by space
-            $sliced_label = explode(' ', $label, 4);
+            $sliced_label = explode(' ', $bookcard[0], 5);
             foreach ($sliced_label as $slice_label_item) {
-                $html_str .= $slice_label_item.'<br />';
+                $html_str .= $slice_label_item.'<br/>';
             }
-            $html_str .= '</b></div>';
+            $html_str .= '</b></td>';
+            $html_str .= '</tr>';
+            $html_str .= '<tr>';
+                $html_str .= '<td align="left" valign="top" style="padding-left:10px;"><font size=3pt><b>'.$bookcard[1].'</b></font></td>';
+            $html_str .= '</tr>';
+            $html_str .= '<tr>';
+                $html_str .= '<td align="left" valign="top" style="padding-left:10px;"><font size=3pt>'.$author_name.'</font></td>';
+            $html_str .= '</tr>';
+            $html_str .= '</table>';
+            $html_str .= '</div>';
             $html_str .= '</td>';
         }
         $html_str .= '</tr>'."\n";
@@ -199,15 +233,15 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     $html_str .= '<script type="text/javascript">self.print();</script>'."\n";
     $html_str .= '</body></html>'."\n";
     // unset the session
-    unset($_SESSION['labels']);
+    unset($_SESSION['bookcards']);
     // write to file
     $print_file_name = 'label_print_result_'.strtolower(str_replace(' ', '_', $_SESSION['uname'])).'.html';
     $file_write = @file_put_contents(UPLOAD.$print_file_name, $html_str);
     if ($file_write) {
         echo '<script type="text/javascript">parent.$(\'#queueCount\').html(\'0\');</script>';
         // open result in new window
-        echo '<script type="text/javascript">top.$.colorbox({href: "'.SWB.FLS.'/'.$print_file_name.'", iframe: true, width: 800, height: 500, title: "' . __('Labels Printing') . '"})</script>';
-    } else { utility::jsAlert(str_replace('{directory}', SB.FLS, __('ERROR! Label failed to generate, possibly because {directory} directory is not writable'))); }
+        echo '<script type="text/javascript">top.$.colorbox({href: "'.SWB.FLS.'/'.$print_file_name.'", iframe: true, width: 800, height: 500, title: "' . __('Book Cards Printing') . '"})</script>';
+    } else { utility::jsAlert(str_replace('{directory}', SB.FLS, __('ERROR! Book Cards failed to generate, possibly because {directory} directory is not writable'))); }
     exit();
 }
 
@@ -216,15 +250,15 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
 <fieldset class="menuBox">
 <div class="menuBoxInner printIcon">
 	<div class="per_title">
-    <h2><?php echo __('Labels Printing'); ?></h2>
+    <h2><?php echo __('Book Card Printing'); ?></h2>
   </div>
 	<div class="sub_section">
     <div class="btn-group">
-      <a target="blindSubmit" href="<?php echo MWB; ?>bibliography/dl_print.php?action=clear" class="notAJAX btn btn-default"><i class="glyphicon glyphicon-trash"></i>&nbsp;<?php echo __('Clear Print Queue'); ?></a>
-      <a target="blindSubmit" href="<?php echo MWB; ?>bibliography/dl_print.php?action=print" class="notAJAX btn btn-default"><i class="glyphicon glyphicon-print"></i>&nbsp;<?php echo __('Print Labels for Selected Data'); ?></a>
+      <a target="blindSubmit" href="<?php echo MWB; ?>bibliography/bookcard_print.php?action=clear" class="notAJAX btn btn-default"><i class="glyphicon glyphicon-trash"></i>&nbsp;<?php echo __('Clear Print Queue'); ?></a>
+      <a target="blindSubmit" href="<?php echo MWB; ?>bibliography/bookcard_print.php?action=print" class="notAJAX btn btn-default"><i class="glyphicon glyphicon-print"></i>&nbsp;<?php echo __('Print Book Cards for Selected Data'); ?></a>
 	    <a href="<?php echo MWB; ?>bibliography/pop_print_settings.php?type=label" class="notAJAX btn btn-default openPopUp" title="<?php echo __('Change print barcode settings'); ?>"><i class="glyphicon glyphicon-wrench"></i></a>
 	</div>
-    <form name="search" action="<?php echo MWB; ?>bibliography/dl_print.php" id="search" method="get" style="display: inline;"><?php echo __('Search'); ?> :
+    <form name="search" action="<?php echo MWB; ?>bibliography/bookcard_print.php" id="search" method="get" style="display: inline;"><?php echo __('Search'); ?> :
     <input type="text" name="keywords" size="30" />
     <input type="submit" id="doSearch" value="<?php echo __('Search'); ?>" class="btn btn-default" />
     </form>
@@ -232,8 +266,8 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     <div class="infoBox">
         <?php
         echo __('Maximum').' <font style="color: #FF0000">'.$max_print.'</font> '.__('records can be printed at once. Currently there is').' ';
-        if (isset($_SESSION['labels'])) {
-            echo '<font id="queueCount" style="color: #FF0000">'.@( count($_SESSION['labels']['item'])+count($_SESSION['labels']['biblio']) ).'</font>';
+        if (isset($_SESSION['bookcards'])) {
+            echo '<font id="queueCount" style="color: #FF0000">'.@( count($_SESSION['bookcards']['item'])+count($_SESSION['bookcards']['biblio']) ).'</font>';
         } else { echo '<font id="queueCount" style="color: #FF0000">0</font>'; }
         echo ' '.__('in queue waiting to be printed.');
         ?>
@@ -259,7 +293,7 @@ if ($sysconf['index']['type'] == 'index' || ($sysconf['index']['type'] == 'sphin
     // table spec
     $table_spec = 'search_biblio AS `index` LEFT JOIN `item` ON `index`.biblio_id=`item`.biblio_id';
     if ($can_read) {
-        $datagrid->setSQLColumn('IF(item.item_id IS NOT NULL, item.item_id, CONCAT(\'b\', index.biblio_id))', 'index.title AS `'.__('Title').'`',
+        $datagrid->setSQLColumn('IF(item.item_id IS NOT NULL, item.item_id, CONCAT(\'b\', index.biblio_id))', 'index.title AS `'.__('Title').'`','item.item_code AS `'.__('Item Code').'`',
             'IF(item.call_number<>\'\', item.call_number, index.call_number) AS `'.__('Call Number').'`');
     }
 } else {
@@ -267,7 +301,7 @@ if ($sysconf['index']['type'] == 'index' || ($sysconf['index']['type'] == 'sphin
     // table spec
     $table_spec = 'biblio LEFT JOIN item ON biblio.biblio_id=item.biblio_id';
     if ($can_read) {
-        $datagrid->setSQLColumn('IF(item.item_id IS NOT NULL, item.item_id, CONCAT(\'b\', biblio.biblio_id))', 'biblio.title AS `'.__('Title').'`',
+        $datagrid->setSQLColumn('IF(item.item_id IS NOT NULL, item.item_id, CONCAT(\'b\', biblio.biblio_id))', 'biblio.title AS `'.__('Title').'`', 'item.item_code AS `'.__('Item Code').'`',
             'IF(item.call_number<>\'\', item.call_number, biblio.call_number) AS `'.__('Call Number').'`');
     }
 }
@@ -301,7 +335,7 @@ $datagrid->chbox_action_button = __('Add To Print Queue');
 $datagrid->chbox_confirm_msg = __('Add to print queue?');
 // set delete proccess URL
 $datagrid->chbox_form_URL = $_SERVER['PHP_SELF'];
-$datagrid->column_width = array(0 => '75%', 1 => '20%');
+$datagrid->column_width = array(0 => '60%', 1 => '20%', 2 => '20%');
 // put the result into variables
 $datagrid_result = $datagrid->createDataGrid($dbs, $table_spec, 20, $can_read);
 if (isset($_GET['keywords']) AND $_GET['keywords']) {

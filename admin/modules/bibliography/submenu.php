@@ -44,3 +44,5 @@ $menu[] = array(__('Data Export'), MWB.'bibliography/export.php', __('Export Bib
 $menu[] = array(__('Data Import'), MWB.'bibliography/import.php', __('Import Data to Bibliographic Database from CSV file'));
 $menu[] = array(__('Item Export'), MWB.'bibliography/item_export.php', __('Export Item/Copies data To CSV format'));
 $menu[] = array(__('Item Import'), MWB.'bibliography/item_import.php', __('Import Data to Item/Copies database from CSV file'));
+//Add Print Book Card Dzikhri
+$menu[] = array(__('Book Card Print'), MWB.'bibliography/bookcard_print.php', __('Print Book Card'));

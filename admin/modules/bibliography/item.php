@@ -81,6 +81,7 @@ if (isset($_POST['saveData']) AND $can_read AND $can_write) {
         }
 
         $data['location_id'] = $_POST['locationID'];
+        $data['issue'] = $_POST['issue'];
         $data['site'] = trim($dbs->escape_string(strip_tags($_POST['itemSite'])));
         $data['coll_type_id'] = intval($_POST['collTypeID']);
         $data['item_status_id'] = $dbs->escape_string($_POST['itemStatusID']);
@@ -228,7 +229,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     /* RECORD FORM */
     // try query
     $itemID = (integer)isset($_POST['itemID'])?$_POST['itemID']:0;
-    $rec_q = $dbs->query('SELECT item.*, b.biblio_id, b.title, s.supplier_name 
+    $rec_q = $dbs->query('SELECT item.*, b.biblio_id, b.title, s.supplier_name, b.gmd_id  
         FROM item
         LEFT JOIN biblio AS b ON item.biblio_id=b.biblio_id
         LEFT JOIN mst_supplier AS s ON item.supplier_id=s.supplier_id
@@ -276,15 +277,17 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
         $b_title = $biblio_d['title'];
         $b_id = $biblio_d['biblio_id'];
         $def_call_number = $biblio_d['call_number'];
+        $gmdid = $biblio_d['gmd_id'];
         // Dzikhri sayyid.ilmy@gmail.com
-        //Auto Generate Item Code / Barcode Item 
-        // Pattern : [YEAR].[GMD_ID].[LAST_INCREMENT_ID];
+        //Auto Generate Item Code / Barcode Pattern 
+        // Item : [YEAR].[GMD_ID].[LAST_INCREMENT_ID];
+        if($gmdid != 35){
+            $year = date("Y"); // Year Now();
+            $gmd_id = $biblio_d['gmd_id']; //GMD ID
+            $incrx = $dbs->query("SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '".DB_NAME."' AND TABLE_NAME = 'item'")->fetch_row(); //LAST INCREMENT
 
-        $year = date("Y"); // Year Now();
-        $gmd_id = $biblio_d['gmd_id']; //GMD ID
-        $incrx = $dbs->query("SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '".DB_NAME."' AND TABLE_NAME = 'item'")->fetch_row(); //LAST INCREMENT
-
-        $rec_d['item_code'] = $year.'.'.$gmd_id.'.'.$incrx[0]; //Generate ID
+            $rec_d['item_code'] = $year.'.'.$gmd_id.'.'.$incrx[0]; //Generate ID
+        }
     }
 
     /* Form Element(s) */
@@ -305,6 +308,9 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
     $form->addTextField('text', 'callNumber', __('Call Number'), isset($rec_d['call_number'])?$rec_d['call_number']:$def_call_number, 'style="width: 40%;"');
     // inventory code
     $form->addTextField('text', 'inventoryCode', __('Inventory Code'), $rec_d['inventory_code'], 'style="width: 100%;"');
+    if($gmdid== 35 or $rec_d['gmd_id']){
+        $form->addTextField('text', 'issue', __('Issue'), $rec_d['issue'], 'style="width: 100%;"');
+    }
     // item location
         // get location data related to this record from database
         $location_q = $dbs->query("SELECT location_id, location_name FROM mst_location");

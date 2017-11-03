@@ -29,6 +29,8 @@ if (!defined('INDEX_AUTH')) {
     die("can not access this file directly");
 }
 
+
+
 // require 'content_list.inc.php';
 
 // class detail extends content_list
@@ -178,16 +180,23 @@ class detail
      */
     public function getItemCopy() {
       global $sysconf;
+
+      //Dzikhri Add
+      // Get The IP Address
+      $ip_allow = array('192.168.78.15','192.168.78.16','120.0.0.1');
+
       $_output = '';
       $copies = $this->record_detail['copies'];
       if (!$copies) {
         return false;
       }
       $_output = '<table class="table table-bordered table-small itemList">';
+      
       foreach ($copies as $copy_d) {
         // check if this collection is on loan
-        $loan_stat_q = $this->db->query('SELECT due_date FROM loan AS l
+        $loan_stat_q = $this->db->query('SELECT due_date, m.member_name FROM loan AS l
             LEFT JOIN item AS i ON l.item_code=i.item_code
+            LEFT JOIN member m on m.member_id = l.member_id 
             WHERE l.item_code=\''.$copy_d['item_code'].'\' AND is_lent=1 AND is_return=0');
         $_output .= '<tr>';
         $_output .= '<td class="biblio-item-code">'.$copy_d['item_code'].'</td>';
@@ -200,7 +209,10 @@ class detail
         $_output .= '<td width="30%">';
         if ($loan_stat_q->num_rows > 0) {
             $loan_stat_d = $loan_stat_q->fetch_row();
-            $_output .= '<span class="label label-important status-on-loan">'.__('Currently On Loan (Due on').date($sysconf['date_format'], strtotime($loan_stat_d[0])).')</span>'; //mfc
+            if(in_array($_SERVER['REMOTE_ADDR'], $ip_allow)){
+                $member_name = $loan_stat_d[1];
+            }
+            $_output .= '<span class="label label-important status-on-loan">'.__('Currently On Loan (Due on').date($sysconf['date_format'], strtotime($loan_stat_d[0])).')</span> - '.$member_name; //mfc
         } else if ($copy_d['no_loan']) {
             $_output .= '<span class="label label-important status-not-loan">'.__('Available but not for loan').' - '.$copy_d['item_status_name'].'</span>';
         } else {

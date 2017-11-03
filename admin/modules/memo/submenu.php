@@ -26,5 +26,6 @@ do_checkIP('smc');
 $menu[] = array('Header', __('Memo'));
 $menu[] = array(__('View Memo List'), MWB.'memo/index.php', __('View Memo List'));
 $menu[] = array(__('Add New Memo'), MWB.'memo/index.php?action=detail', __('Add New Memo Data'));
+$menu[] = array(__('Memo Type'), MWB.'memo/memo_type.php', __('Memo Type'));
 
 

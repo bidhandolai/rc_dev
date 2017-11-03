@@ -142,97 +142,103 @@ class circulation extends member
      **/
     public function addLoanSession($str_item_code, $bool_ignore_rules = false)
     {
-        // you cant borrow any collection if your membership is expired or in pending state
-        if ($this->is_expire) {
-            return LOAN_NOT_PERMITTED;
-        }
-        if ($this->is_pending) {
-            return LOAN_NOT_PERMITTED_PENDING;
-        }
-        $_q = $this->obj_db->query("SELECT b.title, i.coll_type_id,
-            b.gmd_id, ist.no_loan, i.call_number FROM biblio AS b
-            LEFT JOIN item AS i ON b.biblio_id=i.biblio_id
-            LEFT JOIN mst_item_status AS ist ON i.item_status_id=ist.item_status_id
-            WHERE i.item_code='$str_item_code'");
-        $_d = $_q->fetch_row();
-        if ($_q->num_rows > 0) {
-            // first, check for availability for this item
-            $_avail_q = $this->obj_db->query("SELECT item_code FROM loan AS L
-                WHERE L.item_code='$str_item_code' AND L.is_lent=1 AND L.is_return=0");
-            // if we find any record then it means the item is unavailable
-            if ($_avail_q->num_rows > 0) {
-                return ITEM_UNAVAILABLE;
-            }
-            // check loan status for item
-            if ((integer)$_d[3] > 0) {
-                return ITEM_LOAN_FORBID;
-            }
-            // check if loan rules are ignored
-            if (!defined('IGNORE_LOAN_RULES')) {
-                // check if this item is being reserved by other member
-                $_resv_q = $this->obj_db->query("SELECT * FROM reserve AS rs
-                    WHERE rs.item_code='$str_item_code' AND rs.member_id<>'".$_SESSION['memberID']."'");
-                if ($_resv_q->num_rows > 0) {
-                    $_resv2_q = $this->obj_db->query("SELECT * FROM reserve AS rs
-                        WHERE rs.item_code='$str_item_code' ORDER BY reserve_date ASC LIMIT 1");
-                    $_resv2_d = $_resv2_q->fetch_assoc();
-                    if ($_resv2_d['member_id'] != $_SESSION['memberID']) {
-                        return ITEM_RESERVED;    
-                    }
-                }
-            }
-            // loan date
-            $_loan_date = date('Y-m-d');
-            // set loan rules
-            self::setLoanRules($_d[1], $_d[2]);
-            // calculate due date
-            $_due_date = simbio_date::getNextDate($this->loan_periode, $_loan_date);
-            $_due_date = simbio_date::getNextDateNotHoliday($_due_date, $this->holiday_dayname, $this->holiday_date);
-            // check if due date is not more than member expiry date
-            $_expiry_date_compare = simbio_date::compareDates($_due_date, $this->expire_date);
-            if ($_expiry_date_compare != $this->expire_date) {
-                $_due_date = $this->expire_date;
-            }
-            $_curr_loan_num = count(parent::getItemLoan($this->item_loan_rules));
-            $_curr_session_loan_num = count($_SESSION['temp_loan']);
-            // get number of temporay loan session for specific loan rules
-            if ($this->item_loan_rules) {
-                $_curr_session_loan_num = 0;
-                foreach ($_SESSION['temp_loan'] as $loan_session_item) {
-                    if ($loan_session_item['loan_rules_id'] == $this->item_loan_rules) {
-                        $_curr_session_loan_num++;
-                    }
-                }
-            }
+      
 
-            // check if we ignoring loan rules
-            if (defined('IGNORE_LOAN_RULES')) {
-                $_SESSION['temp_loan'][$str_item_code] = array(
-                    'item_code' => $str_item_code,
-                    'call_number' => $_d[4],
-                    'loan_rules_id' => $this->item_loan_rules,
-                    'title' => $_d[0],
-                    'loan_date' => $_loan_date,
-                    'due_date' => $_due_date
-                );
-                return ITEM_SESSION_ADDED;
-            } else if ($this->loan_limit > ($_curr_loan_num + $_curr_session_loan_num)) {
-                // are the loan limit reached?
-                $_SESSION['temp_loan'][$str_item_code] = array(
-                    'item_code' => $str_item_code,
-                    'call_number' => $_d[4],
-                    'loan_rules_id' => $this->item_loan_rules,
-                    'title' => $_d[0],
-                    'loan_date' => $_loan_date,
-                    'due_date' => $_due_date
-                );
-                return ITEM_SESSION_ADDED;
-            } else {
-                return LOAN_LIMIT_REACHED;
+      
+   
+
+            // you cant borrow any collection if your membership is expired or in pending state
+            if ($this->is_expire) {
+                return LOAN_NOT_PERMITTED;
             }
-        } else {
-            return ITEM_NOT_FOUND;
-        }
+            if ($this->is_pending) {
+                return LOAN_NOT_PERMITTED_PENDING;
+            }
+            $_q = $this->obj_db->query("SELECT b.title, i.coll_type_id,
+                b.gmd_id, ist.no_loan, i.call_number FROM biblio AS b
+                LEFT JOIN item AS i ON b.biblio_id=i.biblio_id
+                LEFT JOIN mst_item_status AS ist ON i.item_status_id=ist.item_status_id
+                WHERE i.item_code='$str_item_code'");
+            $_d = $_q->fetch_row();
+            if ($_q->num_rows > 0) {
+                // first, check for availability for this item
+                $_avail_q = $this->obj_db->query("SELECT item_code FROM loan AS L
+                    WHERE L.item_code='$str_item_code' AND L.is_lent=1 AND L.is_return=0");
+                // if we find any record then it means the item is unavailable
+                if ($_avail_q->num_rows > 0) {
+                    return ITEM_UNAVAILABLE;
+                }
+                // check loan status for item
+                if ((integer)$_d[3] > 0) {
+                    return ITEM_LOAN_FORBID;
+                }
+                // check if loan rules are ignored
+                if (!defined('IGNORE_LOAN_RULES')) {
+                    // check if this item is being reserved by other member
+                    $_resv_q = $this->obj_db->query("SELECT * FROM reserve AS rs
+                        WHERE rs.item_code='$str_item_code' AND rs.member_id<>'".$_SESSION['memberID']."'");
+                    if ($_resv_q->num_rows > 0) {
+                        $_resv2_q = $this->obj_db->query("SELECT * FROM reserve AS rs
+                            WHERE rs.item_code='$str_item_code' ORDER BY reserve_date ASC LIMIT 1");
+                        $_resv2_d = $_resv2_q->fetch_assoc();
+                        if ($_resv2_d['member_id'] != $_SESSION['memberID']) {
+                            return ITEM_RESERVED;    
+                        }
+                    }
+                }
+                // loan date
+                $_loan_date = date('Y-m-d');
+                // set loan rules
+                self::setLoanRules($_d[1], $_d[2]);
+                // calculate due date
+                $_due_date = simbio_date::getNextDate($this->loan_periode, $_loan_date);
+                $_due_date = simbio_date::getNextDateNotHoliday($_due_date, $this->holiday_dayname, $this->holiday_date);
+                // check if due date is not more than member expiry date
+                $_expiry_date_compare = simbio_date::compareDates($_due_date, $this->expire_date);
+                if ($_expiry_date_compare != $this->expire_date) {
+                    $_due_date = $this->expire_date;
+                }
+                $_curr_loan_num = count(parent::getItemLoan($this->item_loan_rules));
+                $_curr_session_loan_num = count($_SESSION['temp_loan']);
+                // get number of temporay loan session for specific loan rules
+                if ($this->item_loan_rules) {
+                    $_curr_session_loan_num = 0;
+                    foreach ($_SESSION['temp_loan'] as $loan_session_item) {
+                        if ($loan_session_item['loan_rules_id'] == $this->item_loan_rules) {
+                            $_curr_session_loan_num++;
+                        }
+                    }
+                }
+
+                // check if we ignoring loan rules
+                if (defined('IGNORE_LOAN_RULES')) {
+                    $_SESSION['temp_loan'][$str_item_code] = array(
+                        'item_code' => $str_item_code,
+                        'call_number' => $_d[4],
+                        'loan_rules_id' => $this->item_loan_rules,
+                        'title' => $_d[0],
+                        'loan_date' => $_loan_date,
+                        'due_date' => $_due_date
+                    );
+                    return ITEM_SESSION_ADDED;
+                } else if ($this->loan_limit > ($_curr_loan_num + $_curr_session_loan_num)) {
+                    // are the loan limit reached?
+                    $_SESSION['temp_loan'][$str_item_code] = array(
+                        'item_code' => $str_item_code,
+                        'call_number' => $_d[4],
+                        'loan_rules_id' => $this->item_loan_rules,
+                        'title' => $_d[0],
+                        'loan_date' => $_loan_date,
+                        'due_date' => $_due_date
+                    );
+                    return ITEM_SESSION_ADDED;
+                } else {
+                    return LOAN_LIMIT_REACHED;
+                }
+            } else {
+                return ITEM_NOT_FOUND;
+            }
+        
     }
 
 

@@ -75,8 +75,6 @@ include 'function.php';
 </head>
 
 <body>
-  <marquee><font color="RED">Please report any bugs and errors you find in this app during beta version. Open Beta 16 Oct 2017 - 28 Oct 2017. [Launch on 01 Oct 2017] </font> </marquee>
-  <hr>
   <aside class="s-sidebar">
     <nav class="s-menu" role="navigation">
       <header class="s-header">

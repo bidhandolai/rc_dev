@@ -59,7 +59,7 @@ $can_read = utility::havePrivilege($current_module, 'r');
 
 // submenu
 $sub_menu = $module->generateSubMenu(($current_module AND $can_read)?$current_module:'');
-print_r($_SESSION);
+//print_r($_SESSION);
 
 // start the output buffering for main content
 ob_start();

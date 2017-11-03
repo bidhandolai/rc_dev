@@ -104,6 +104,14 @@ if (!$reportView) {
             ?>
             </div>
         </div>
+         <div class="divRow">
+            <div class="divRowLabel"><?php echo __('Call Number'); ?></div>
+            <div class="divRowContent">
+            <?php
+            echo simbio_form_element::textField('text', 'callNumber', '', 'style="width: 50%"');
+            ?>
+            </div>
+        </div>
         <div class="divRow">
             <div class="divRowLabel"><?php echo __('Loan Date From'); ?></div>
             <div class="divRowContent">
@@ -201,6 +209,11 @@ if (!$reportView) {
     if (isset($_GET['itemCode']) AND !empty($_GET['itemCode'])) {
         $item_code = $dbs->escape_string(trim($_GET['itemCode']));
         $criteria .= ' AND i.item_code=\''.$item_code.'\'';
+    }
+    //Dzikhri Call Number Filter Add
+    if (isset($_GET['callNumber']) AND !empty($_GET['callNumber'])) {
+        $call_number = $dbs->escape_string(trim($_GET['callNumber']));
+        $criteria .= ' AND i.call_number like \'%'.$call_number.'%\'';
     }
     // loan date
     if (isset($_GET['startDate']) AND isset($_GET['untilDate'])) {
