@@ -155,8 +155,8 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
     }
 
     // send query to database
-    $biblio_q = $dbs->query('SELECT i.call_number, b.title, i.item_code, b.biblio_id, b.gmd_id FROM biblio AS b LEFT JOIN item AS i ON b.biblio_id=i.biblio_id WHERE '.$criteria);
-    // echo 'SELECT IF(i.call_number!=\'\', i.call_number, b.call_number) FROM biblio AS b LEFT JOIN item AS i ON b.biblio_id=i.biblio_id WHERE '.$criteria;
+    $biblio_q = $dbs->query('SELECT i.call_number, b.title, i.item_code, b.biblio_id, b.gmd_id, i.issue FROM biblio AS b LEFT JOIN item AS i ON b.biblio_id=i.biblio_id WHERE '.$criteria);
+     //echo 'SELECT i.call_number, b.title, i.item_code, b.biblio_id, b.gmd_id, i.issue FROM biblio AS b LEFT JOIN item AS i ON b.biblio_id=i.biblio_id WHERE '.$criteria;
     $label_data_array = array();
     while ($biblio_d = $biblio_q->fetch_row()) {
         if ($biblio_d[0]) { 
@@ -208,6 +208,11 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
             $html_str .= '<tr>';
             $html_str .= '<td colspan="2" align="right"><font size=1pt>'.$bookcard[2].'</font></td>';
             $html_str .= '</tr>';
+            if($bookcard[4] == 35){
+                $html_str .= '<tr>';
+                $html_str .= '<td colspan="2" align="center"><font size=3pt>Back Issue</font></td>';
+                $html_str .= '</tr>';
+            }
             $html_str .= '<tr>';
             $html_str .= '<td rowspan="3" align="center" valign="top" width="10%"><b>';
             // explode label data by space
@@ -220,9 +225,15 @@ if (isset($_GET['action']) AND $_GET['action'] == 'print') {
             $html_str .= '<tr>';
                 $html_str .= '<td align="left" valign="top" style="padding-left:10px;"><font size=3pt><b>'.$bookcard[1].'</b></font></td>';
             $html_str .= '</tr>';
-            $html_str .= '<tr>';
-                $html_str .= '<td align="left" valign="top" style="padding-left:10px;"><font size=3pt>'.$author_name.'</font></td>';
-            $html_str .= '</tr>';
+            if($bookcard[4] == 35){
+                $html_str .= '<tr>';
+                    $html_str .= '<td align="left" valign="top" style="padding-left:10px;"><font size=3pt>'.$bookcard[5].'</font></td>';
+                $html_str .= '</tr>';
+            }else{
+                $html_str .= '<tr>';
+                    $html_str .= '<td align="left" valign="top" style="padding-left:10px;"><font size=3pt>'.$author_name.'</font></td>';
+                $html_str .= '</tr>';
+            }
             $html_str .= '</table>';
             $html_str .= '</div>';
             $html_str .= '</td>';
