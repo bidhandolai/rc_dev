@@ -123,7 +123,7 @@ class Biblio {
   public function getItemCopy() {
     $items = array();
     $_output = '';
-    $copy_q = $this->db->query(sprintf('SELECT i.item_code, i.call_number, loc.location_name, stat.*, i.site FROM item AS i
+    $copy_q = $this->db->query(sprintf('SELECT i.item_code, i.call_number, loc.location_name, stat.*, i.site, i.issue FROM item AS i
         LEFT JOIN mst_item_status AS stat ON i.item_status_id=stat.item_status_id
         LEFT JOIN mst_location AS loc ON i.location_id=loc.location_id
         WHERE i.biblio_id=%d', $this->biblio_id));
