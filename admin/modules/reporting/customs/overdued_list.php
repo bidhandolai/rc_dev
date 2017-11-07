@@ -167,7 +167,7 @@ if (!$reportView) {
       $member_mail_address = $member_d[3];
       unset($member_q);
 
-      $ovd_title_q = $obj_db->query('SELECT l.item_code, i.price, i.price_currency,
+      $ovd_title_q = $obj_db->query('SELECT l.item_code, i.price, i.price_currency, i.call_number, 
           b.title, l.loan_date,
           l.due_date, (TO_DAYS(DATE(NOW()))-TO_DAYS(due_date)) AS \'Overdue Days\'
           FROM loan AS l
@@ -181,7 +181,8 @@ if (!$reportView) {
       while ($ovd_title_d = $ovd_title_q->fetch_assoc()) {
           $_buffer .= '<tr>';
           $_buffer .= '<td valign="top" width="10%">'.$ovd_title_d['item_code'].'</td>';
-          $_buffer .= '<td valign="top" width="40%">'.$ovd_title_d['title'].'<div>'.__('Price').': '.$ovd_title_d['price'].' '.$ovd_title_d['price_currency'].'</div></td>';
+          $_buffer .= '<td valign="top" width="30%">'.$ovd_title_d['title'].'</td>';
+          $_buffer .= '<td valign="top" width="10%">'.$ovd_title_d['call_number'].'</td>';
           $_buffer .= '<td width="20%">'.__('Overdue').': '.$ovd_title_d['Overdue Days'].' '.__('day(s)').'</td>';
           $_buffer .= '<td width="30%">'.__('Loan Date').': '.$ovd_title_d['loan_date'].' &nbsp; '.__('Due Date').': '.$ovd_title_d['due_date'].'</td>';
           $_buffer .= '</tr>';
