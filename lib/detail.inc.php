@@ -200,7 +200,11 @@ class detail
             WHERE l.item_code=\''.$copy_d['item_code'].'\' AND is_lent=1 AND is_return=0');
         $_output .= '<tr>';
         $_output .= '<td class="biblio-item-code">'.$copy_d['item_code'].'</td>';
-        $_output .= '<td class="biblio-call-number">'.$copy_d['call_number'].'</td>';
+        if($copy_d['issue'] == ''){
+          $_output .= '<td class="biblio-call-number">'.$copy_d['call_number'].'</td>';
+        }else{
+          $_output .= '<td class="biblio-call-number">'.$copy_d['issue'].'</td>';
+        }
         $_output .= '<td class="biblio-location">'.$copy_d['location_name'];
         if (trim($copy_d['site']) != "") {
             $_output .= ' ('.$copy_d['site'].')';
