@@ -779,7 +779,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
   $str_input = '<div class="'.$visibility.'"><a class="notAJAX button btn btn-info openPopUp" href="'.MWB.'bibliography/pop_biblio_rel.php?biblioID='.$rec_d['biblio_id'].'" title="'.__('Biblio Relation').'">'.__('Add Relation').'</a></div>';
   $str_input .= '<iframe name="biblioIframe" id="biblioIframe" class="borderAll" style="width: 100%; height: 100px;" src="'.MWB.'bibliography/iframe_biblio_rel.php?biblioID='.$rec_d['biblio_id'].'&block=1"></iframe>';
   $form->addAnything(__('Related Biblio Data'), $str_input);
-
+  // Dzikhri Add Supporting Material 
   $form->addTextField('text', 'supp_mat', __('Supporting Materials'), $rec_d['supp_mat'], 'style="width: 75%;"', __('Supporting Materials Details'));
 
   /**
@@ -918,7 +918,7 @@ if (isset($_POST['detail']) OR (isset($_GET['action']) AND $_GET['action'] == 'd
 
   // table spec
   $table_spec = 'biblio LEFT JOIN item ON biblio.biblio_id=item.biblio_id LEFT JOIN mst_gmd on mst_gmd.gmd_id=biblio.gmd_id ';
-
+  // Dzikhri ADD Call Number to the list 
   if ($can_read AND $can_write) {
     $datagrid->setSQLColumn('biblio.biblio_id', 'biblio.biblio_id AS bid',
     'biblio.title AS \''.__('Title').'\'',
